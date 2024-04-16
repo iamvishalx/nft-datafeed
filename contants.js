@@ -17,6 +17,16 @@ const HttpStatus = {
   500: "INTERNAL_SERVER_ERROR",
 };
 
+const allowedMetricNames = ["marketcap", "assets", "floorprice"];
+
+const getSelectedKeysForNft = (metric_name) => {
+  if (metric_name) {
+    return { [metric_name]: 1, _id: 0 };
+  } else return { name: 1, image_url: 1, description: 1, _id: 0 };
+};
+
 module.exports = {
   HttpStatus,
+  allowedMetricNames,
+  getSelectedKeysForNft,
 };

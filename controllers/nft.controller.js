@@ -3,7 +3,7 @@ const ApiError = require("../utils/apiError");
 const catchAsync = require("../utils/catchAsync");
 const rawNftData = require("../rawdata.json");
 const models = require("../models/index.models");
-const { HttpStatus } = require("../contants");
+const { HttpStatus, getSelectedKeysForNft } = require("../contants");
 
 const migrateAutomatically = process.env.SHOULD_MIGRATE_AUTOMATICALLY || false;
 
@@ -68,31 +68,29 @@ const findByChainIdAndAddress = async (chain_id, address, select) => {
 const getNftByChainIdAndAddress = catchAsync(async (req, res, next) => {
   const chain_id = req.params.chain_id;
   const address = req.params.address;
-  const selectKeys = { name: 1, image_url: 1, description: 1, _id: 0 };
 
-  const nft = await findByChainIdAndAddress(chain_id, address, selectKeys);
+  const nft = await findByChainIdAndAddress(chain_id, address, getSelectedKeysForNft(null));
 
   if (!nft) throw new ApiError(HttpStatus.NOT_FOUND, "No data found");
   return res.status(HttpStatus.OK).send({ success: true, data: nft });
 });
 
-const getMetricsByType = catchAsync(async (req, res, next) => {
+const getMetricsByName = catchAsync(async (req, res, next) => {
   const chain_id = req.params.chain_id;
   const address = req.params.address;
-  const type = req.params.type;
-  const selectKeys = { [type]: 1, _id: 0 };
+  const metric_name = req.params.metric_name;
 
-  const nft = await findByChainIdAndAddress(chain_id, address, selectKeys);
+  const nft = await findByChainIdAndAddress(chain_id, address, getSelectedKeysForNft(metric_name));
 
   if (!nft) throw new ApiError(HttpStatus.NOT_FOUND, "No data found");
   return res
     .status(HttpStatus.OK)
-    .send({ success: true, data: { metric_name: type, value: nft[type] } });
+    .send({ success: true, data: { metric_name: metric_name, value: nft[metric_name] } });
 });
 
 module.exports = {
   migrateRawToDatabase,
   findByChainIdAndAddress,
   getNftByChainIdAndAddress,
-  getMetricsByType,
+  getMetricsByName,
 };

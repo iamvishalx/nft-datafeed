@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { allowedMetricNames } = require("../contants");
 
 const urlParamsValidator = {
   params: Joi.object({
@@ -7,19 +8,19 @@ const urlParamsValidator = {
   }),
 };
 
-const urlParamsWithTypeValidator = {
+const urlParamsWithMetricNameValidator = {
   params: Joi.object({
     chain_id: Joi.string().min(1).required().messages({ "any.invalid": "Invalid chain id " }),
     address: Joi.string().min(1).required().messages({ "any.invalid": "Invalid address " }),
-    type: Joi.string()
+    metric_name: Joi.string()
       .min(1)
       .required()
-      .valid("marketcap", "assets", "floorprice")
-      .messages({ "any.invalid": "Invalid type " }),
+      .valid(...allowedMetricNames)
+      .messages({ "any.invalid": "Invalid metric_name" }),
   }),
 };
 
 module.exports = {
   urlParamsValidator,
-  urlParamsWithTypeValidator,
+  urlParamsWithMetricNameValidator,
 };
