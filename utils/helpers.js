@@ -1,5 +1,10 @@
 const { allowedMetricNames } = require("../contants");
 
+/**
+ * Parses and validates a message object received from a WebSocket connection.
+ * @param {string} message The message object to be parsed and validated.
+ * @returns {Object} An object containing the parsed and validated data and any encountered errors.
+ */
 const parseAndValidateMessage = (message) => {
   try {
     const parsedMessage = JSON.parse(message);

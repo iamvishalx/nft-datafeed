@@ -9,6 +9,11 @@ const clients = {
   rooms: {},
 };
 
+/**
+ * Adds a WebSocket connection to a specific room.
+ * @param {WebSocket} ws The WebSocket connection to add.
+ * @param {string} roomId The ID of the room to add the WebSocket to.
+ */
 const addSocketToRoom = (ws, roomId) => {
   if (!roomId) {
     console.log("No roomId passed");
@@ -26,6 +31,11 @@ const addSocketToRoom = (ws, roomId) => {
   console.log("Client added: ", rooms[roomId].length);
 };
 
+/**
+ * Removes a WebSocket connection from a specific room.
+ * @param {WebSocket} ws The WebSocket connection to remove.
+ * @param {string} roomId The ID of the room to remove the WebSocket from.
+ */
 const removeSocketFromRoom = (ws, roomId) => {
   const rooms = clients.rooms;
 
@@ -41,6 +51,12 @@ const removeSocketFromRoom = (ws, roomId) => {
   return;
 };
 
+/**
+ * Broadcasts a message to all connected WebSocket clients.
+ * @param {WebSocketServer} wss The WebSocket server instance.
+ * @param {string} response The message to broadcast.
+ * @param {boolean} isBinary Whether the message is binary.
+ */
 const broadcastToAll = (wss, response, isBinary) => {
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -50,6 +66,12 @@ const broadcastToAll = (wss, response, isBinary) => {
   return;
 };
 
+/**
+ * Broadcasts a message to all WebSocket clients in a specific room.
+ * @param {string} roomId The ID of the room to broadcast the message to.
+ * @param {string} response The message to broadcast.
+ * @param {boolean} isBinary Whether the message is binary.
+ */
 const broadcastToRoom = (roomId, response, isBinary) => {
   const rooms = clients.rooms;
   rooms[roomId].forEach((client) => {
@@ -61,19 +83,39 @@ const broadcastToRoom = (roomId, response, isBinary) => {
   return;
 };
 
+/**
+ * Handles errors that occur before a WebSocket upgrade.
+ * @param {Error} error The error that occurred.
+ */
+
 const preSocketUpgradeError = (error) => {
   console.log("Pre Socket Upgrade Error - ", error);
 };
 
-const postSocketUpgradeError = (error, wss, ws) => {
-  sendClient(wss, ws, JSON.stringify({ error: "Some error occurred" }));
+/**
+ * Handles errors that occur after a WebSocket upgrade.
+ * @param {Error} error The error that occurred.
+ * @param {WebSocketServer} wss The WebSocket server instance.
+ */
+const postSocketUpgradeError = (error, wss) => {
+  broadcastToAll(wss, JSON.stringify({ error: "Some error occurred" }), true);
   console.log("Post Socket Upgrade Error - ", error);
 };
 
+/**
+ * Handles the WebSocket 'close' event.
+ * @param {number} code The close code.
+ * @param {string} reason The reason for closing.
+ */
 const handleOnClose = (code, reason) => {
   console.log("socket closed ", code, "-", reason);
 };
 
+/**
+ * Builds a response message based on the received WebSocket message.
+ * @param {Buffer} data The message data received from the WebSocket.
+ * @returns {Promise<Object>} A Promise that resolves to the response message.
+ */
 const buildResponseOnMessage = async (data) => {
   const message = data.toString("utf-8");
 
@@ -100,6 +142,10 @@ const buildResponseOnMessage = async (data) => {
   return { data: JSON.stringify(response) };
 };
 
+/**
+ * Configures WebSocket connections for the given HTTP server.
+ * @param {http.Server} server The HTTP server to upgrade to WebSocket connections.
+ */
 const configureSocket = (server) => {
   const wss = new WebSocketServer({ noServer: true });
 
